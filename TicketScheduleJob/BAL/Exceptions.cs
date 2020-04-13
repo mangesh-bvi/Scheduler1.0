@@ -98,8 +98,15 @@ namespace TicketScheduleJob
                 };
 
                 DAL dal = new DAL();
-                
-                dal.InsertErrorLog(errorLogs);
+
+                MySettingsConfigMoal mysettingsconfigmoal = new MySettingsConfigMoal();
+                Program obj = new Program();
+                mysettingsconfigmoal = obj.GetConfigDetails();
+
+                if (mysettingsconfigmoal.IsWriteLog == "1")
+                {
+                    dal.InsertErrorLog(errorLogs);
+                }
             }
             catch (Exception e)
             {

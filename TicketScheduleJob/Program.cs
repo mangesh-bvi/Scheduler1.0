@@ -22,11 +22,12 @@ namespace TicketScheduleJob
             Exceptions exceptions = null;
             try
             {
-                GetConfigDetails(out string Connectionstring, out string interval);
+                MySettingsConfigMoal mysettingsconfigmoal = new MySettingsConfigMoal();
+                mysettingsconfigmoal  = GetConfigDetails();
                 Console.WriteLine("Scheduler Started");
                 //GetScheduleDetails();
 
-                double intervalInMinutes = Convert.ToDouble(interval);// 60 * 5000; // milliseconds to one min
+                double intervalInMinutes = Convert.ToDouble(mysettingsconfigmoal.IntervalInMinutes);// 60 * 5000; // milliseconds to one min
 
 
                 Timer checkForTime = new Timer(intervalInMinutes);
@@ -69,20 +70,32 @@ namespace TicketScheduleJob
         }
 
 
-        public void GetConfigDetails(out string Connectionstring, out string interval)
+        public MySettingsConfigMoal GetConfigDetails()
         {
-            var builder = new ConfigurationBuilder()
+            MySettingsConfigMoal MySettingsConfigMoal = new MySettingsConfigMoal();
+
+            try
+            {
+                var builder = new ConfigurationBuilder()
               .SetBasePath(Directory.GetCurrentDirectory())
               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
               .AddUserSecrets<Program>()
               .AddEnvironmentVariables();
 
-            IConfigurationRoot configuration = builder.Build();
-            var mySettingsConfig = new MySettingsConfig();
-            configuration.GetSection("MySettings").Bind(mySettingsConfig);
+                IConfigurationRoot configuration = builder.Build();
+                var mySettingsConfig = new MySettingsConfig();
+                configuration.GetSection("MySettings").Bind(mySettingsConfig);
 
-            Connectionstring = configuration.GetConnectionString("DefaultConnection");
-            interval = mySettingsConfig.IntervalInMinutes;
+                MySettingsConfigMoal.Connectionstring = configuration.GetConnectionString("DefaultConnection");
+                MySettingsConfigMoal.IntervalInMinutes = mySettingsConfig.IntervalInMinutes;
+                MySettingsConfigMoal.IsWriteLog = mySettingsConfig.IsWriteLog;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Error getting data from appsetting.json");
+            }
+
+            return MySettingsConfigMoal;
         }
     }
 }

@@ -9,4 +9,11 @@ namespace TicketScheduleJob
         public string IntervalInMinutes { get; set; }
         public string IsWriteLog { get; set; }
     }
+
+    public class MySettingsConfigMoal
+    {
+        public string Connectionstring { get; set; }
+        public string IntervalInMinutes { get; set; }
+        public string IsWriteLog { get; set; }
+    }
 }

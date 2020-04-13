@@ -18,10 +18,11 @@ namespace TicketScheduleJob
         static Exceptions exceptions;
         static DAL()
         {
+            MySettingsConfigMoal mysettingsconfigmoal = new MySettingsConfigMoal(); 
             Program obj = new Program();
-            obj.GetConfigDetails(out string Connectionstring, out string interval);
+            mysettingsconfigmoal = obj.GetConfigDetails();
 
-            conn = new MySqlConnection(Connectionstring);
+            conn = new MySqlConnection(mysettingsconfigmoal.Connectionstring);
             exceptions = new Exceptions();
         }
 
@@ -314,11 +315,11 @@ namespace TicketScheduleJob
 
             try
             {
-                //timespan = "";
-                //if (String.IsNullOrEmpty(timespan))
-                //{
-                //    return timespan;
-                //}
+                timespan = "";
+                if (String.IsNullOrEmpty(timespan))
+                {
+                    return timespan;
+                }
                 exceptions.FileText("Step DAL 3 Start");
 
 

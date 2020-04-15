@@ -315,74 +315,85 @@ namespace TicketScheduleJob
 
             try
             {
-                timespan = "";
-                if (String.IsNullOrEmpty(timespan))
-                {
-                    return timespan;
-                }
+                //timespan = "";
+                //if (String.IsNullOrEmpty(timespan))
+                //{
+                //    return timespan;
+                //}
                 exceptions.FileText("Step DAL 3 Start");
 
 
                 if (ColName == "CreatedSpan" || ColName == "ModifiedSpan" || ColName == "AssignedSpan")
                 {
+                    exceptions.FileText("Step DAL 3.1");
                     diff = now - Convert.ToDateTime(time);
+                    exceptions.FileText("Step DAL 3.2");
                     timespan = CalculateSpan(diff) + " ago";
 
                 }
                 else if (ColName == "RespondTimeRemainingSpan")
                 {
+                    exceptions.FileText("Step DAL 3.3");
                     PriorityArr = time.Split(new char[] { '|' })[0].Split(new char[] { '-' });
-
+                    exceptions.FileText("Step DAL 3.4");
                     switch (PriorityArr[1])
                     {
                         case "D":
+                            exceptions.FileText("Step DAL D 3.4");
                             diff = (Convert.ToDateTime(time.Split(new char[] { '|' })[1]).AddDays(Convert.ToDouble(PriorityArr[0]))) - now;
 
                             break;
 
                         case "H":
+                            exceptions.FileText("Step DAL H 3.4");
                             diff = (Convert.ToDateTime(time.Split(new char[] { '|' })[1]).AddHours(Convert.ToDouble(PriorityArr[0]))) - now;
 
                             break;
 
                         case "M":
+                            exceptions.FileText("Step DAL M 3.4");
                             diff = (Convert.ToDateTime(time.Split(new char[] { '|' })[1]).AddMinutes(Convert.ToDouble(PriorityArr[0]))) - now;
 
                             break;
 
                     }
+                    exceptions.FileText("Step DAL 3.5");
                     timespan = CalculateSpan(diff);
                 }
                 else if (ColName == "ResponseOverDueSpan" || ColName == "ResolutionOverDueSpan")
                 {
+                    exceptions.FileText("Step DAL 3.6");
                     PriorityArr = time.Split(new char[] { '|' })[0].Split(new char[] { '-' });
-
+                    exceptions.FileText("Step DAL 3.7");
                     switch (PriorityArr[1])
                     {
                         case "D":
+                            exceptions.FileText("Step DAL D 3.7");
                             diff = now - (Convert.ToDateTime(time.Split(new char[] { '|' })[1]).AddDays(Convert.ToDouble(PriorityArr[0])));
 
                             break;
 
                         case "H":
+                            exceptions.FileText("Step DAL H 3.7");
                             diff = now - (Convert.ToDateTime(time.Split(new char[] { '|' })[1]).AddHours(Convert.ToDouble(PriorityArr[0])));
 
                             break;
 
                         case "M":
+                            exceptions.FileText("Step DAL M 3.7");
                             diff = now - (Convert.ToDateTime(time.Split(new char[] { '|' })[1]).AddMinutes(Convert.ToDouble(PriorityArr[0])));
 
                             break;
 
                     }
-
+                    exceptions.FileText("Step DAL 3.8");
                     timespan = CalculateSpan(diff);
                 }
                 exceptions.FileText("Step DAL 3 End");
             }
             catch (Exception ex)
             {
-              //  exceptions.SendErrorToText(ex);
+                exceptions.SendErrorToText(ex);
             }
             finally
             {
@@ -397,24 +408,28 @@ namespace TicketScheduleJob
             string span = string.Empty;
             try
             {
-                exceptions.FileText("Step DAL 4 Start");
+                exceptions.FileText("Step DAL CalculateSpan Start");
                 if (Math.Abs(ts.Days) > 0)
                 {
+                    exceptions.FileText("Step DAL CalculateSpan Days Start");
                     span = Convert.ToString(Math.Abs(ts.Days)) + " Days";
                 }
                 else if (Math.Abs(ts.Hours) > 0)
                 {
+                    exceptions.FileText("Step DAL CalculateSpan Hours Start");
                     span = Convert.ToString(Math.Abs(ts.Hours)) + " Hours";
                 }
                 else if (Math.Abs(ts.Minutes) > 0)
                 {
+                    exceptions.FileText("Step DAL CalculateSpan Minutes Start");
                     span = Convert.ToString(Math.Abs(ts.Minutes)) + " Minutes";
                 }
                 else if (Math.Abs(ts.Seconds) > 0)
                 {
+                    exceptions.FileText("Step DAL CalculateSpan Seconds Start");
                     span = Convert.ToString(Math.Abs(ts.Seconds)) + " Seconds";
                 }
-                exceptions.FileText("Step DAL 4 End");
+                exceptions.FileText("Step DAL CalculateSpan End");
             }
             catch (Exception ex)
             {

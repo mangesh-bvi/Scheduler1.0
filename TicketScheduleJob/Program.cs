@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
+using System.Threading;
 using System.Timers;
 
 namespace TicketScheduleJob
@@ -14,7 +15,7 @@ namespace TicketScheduleJob
             Program obj = new Program();
             obj.StartProcess();
 
-            Console.ReadLine();
+            // Console.ReadLine();
         }
 
         public void StartProcess()
@@ -23,16 +24,18 @@ namespace TicketScheduleJob
             try
             {
                 MySettingsConfigMoal mysettingsconfigmoal = new MySettingsConfigMoal();
-                mysettingsconfigmoal  = GetConfigDetails();
-                Console.WriteLine("Scheduler Started");
+                mysettingsconfigmoal = GetConfigDetails();
+                // Console.WriteLine("Scheduler Started");
                 //GetScheduleDetails();
 
                 double intervalInMinutes = Convert.ToDouble(mysettingsconfigmoal.IntervalInMinutes);// 60 * 5000; // milliseconds to one min
 
+                Thread _Individualprocessthread = new Thread(new ThreadStart(CallEveryMin));
+                _Individualprocessthread.Start();
 
-                Timer checkForTime = new Timer(intervalInMinutes);
-                checkForTime.Elapsed += new ElapsedEventHandler(GetScheduleDetails);
-                checkForTime.Enabled = true;
+                //Timer checkForTime = new Timer(intervalInMinutes);
+                //checkForTime.Elapsed += new ElapsedEventHandler(GetScheduleDetails);
+                //checkForTime.Enabled = true;
             }
             catch (Exception ex)
             {
@@ -41,7 +44,22 @@ namespace TicketScheduleJob
 
         }
 
-        public void GetScheduleDetails(object sender, ElapsedEventArgs e)
+        public void CallEveryMin()
+        {
+            MySettingsConfigMoal mysettingsconfigmoal = new MySettingsConfigMoal();
+            mysettingsconfigmoal = GetConfigDetails();
+
+            int intervalInMinutes = Convert.ToInt32(mysettingsconfigmoal.IntervalInMinutes);// 60 * 5000; // milliseconds to one min
+
+            while (true)
+            {
+                GetScheduleDetails();
+                Thread.Sleep(intervalInMinutes);
+            }
+        }
+
+
+        public void GetScheduleDetails()
         //public void GetScheduleDetails()
         {
             Exceptions exceptions = null;
@@ -50,7 +68,7 @@ namespace TicketScheduleJob
 
                 exceptions = new Exceptions();
 
-                Console.WriteLine("New Process is going on... please wait...");
+                //  Console.WriteLine("New Process is going on... please wait...");
 
                 exceptions.FileText("Step Start");
 
@@ -60,7 +78,7 @@ namespace TicketScheduleJob
 
 
                 exceptions.FileText("Step End");
-                Console.WriteLine("New Process Complete...");
+                //  Console.WriteLine("New Process Complete...");
             }
             catch (Exception ex)
             {
@@ -90,9 +108,9 @@ namespace TicketScheduleJob
                 MySettingsConfigMoal.IntervalInMinutes = mySettingsConfig.IntervalInMinutes;
                 MySettingsConfigMoal.IsWriteLog = mySettingsConfig.IsWriteLog;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine("Error getting data from appsetting.json");
+                // Console.WriteLine("Error getting data from appsetting.json");
             }
 
             return MySettingsConfigMoal;

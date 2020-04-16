@@ -350,9 +350,9 @@ namespace TicketScheduleJob
                 exceptions.FileText("GetNameOfExcel 1");
 
                 string startupPath = Environment.CurrentDirectory;
-                string projectDirectory = Directory.GetParent(startupPath).Parent.FullName;
+                //string projectDirectory = Directory.GetParent(startupPath).Parent.FullName;
                 exceptions.FileText("GetNameOfExcel 2");
-                subPath = Path.Combine(projectDirectory, "ExcelFile", CreatedBy + "_" + TenantID);
+                subPath = Path.Combine(startupPath, "ExcelFile", CreatedBy + "_" + TenantID);
 
                 if (!Directory.Exists(subPath))
                 {

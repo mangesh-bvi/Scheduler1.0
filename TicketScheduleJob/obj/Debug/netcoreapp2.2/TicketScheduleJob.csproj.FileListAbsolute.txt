@@ -33,3 +33,14 @@ D:\Devesh\Devesh\Ticketing\DotNetCore Console\Git Up\Scheduler1.0\TicketSchedule
 D:\Devesh\Devesh\Ticketing\DotNetCore Console\Git Up\Scheduler1.0\TicketScheduleJob\obj\Debug\netcoreapp2.2\TicketScheduleJob.AssemblyInfo.cs
 D:\Devesh\Devesh\Ticketing\DotNetCore Console\Git Up\Scheduler1.0\TicketScheduleJob\obj\Debug\netcoreapp2.2\TicketScheduleJob.dll
 D:\Devesh\Devesh\Ticketing\DotNetCore Console\Git Up\Scheduler1.0\TicketScheduleJob\obj\Debug\netcoreapp2.2\TicketScheduleJob.pdb
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\bin\Debug\netcoreapp2.2\appsettings.json
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\bin\Debug\netcoreapp2.2\TicketScheduleJob.deps.json
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\bin\Debug\netcoreapp2.2\TicketScheduleJob.runtimeconfig.json
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\bin\Debug\netcoreapp2.2\TicketScheduleJob.runtimeconfig.dev.json
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\bin\Debug\netcoreapp2.2\TicketScheduleJob.dll
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\bin\Debug\netcoreapp2.2\TicketScheduleJob.pdb
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\obj\Debug\netcoreapp2.2\TicketScheduleJob.csprojAssemblyReference.cache
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\obj\Debug\netcoreapp2.2\TicketScheduleJob.AssemblyInfoInputs.cache
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\obj\Debug\netcoreapp2.2\TicketScheduleJob.AssemblyInfo.cs
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\obj\Debug\netcoreapp2.2\TicketScheduleJob.dll
+D:\Suraj Data\Suraj\Ticketing Service\Scedular\Scheduler1.0\TicketScheduleJob\obj\Debug\netcoreapp2.2\TicketScheduleJob.pdb

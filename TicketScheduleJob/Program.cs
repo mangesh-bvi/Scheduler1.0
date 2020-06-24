@@ -77,6 +77,8 @@ namespace TicketScheduleJob
                 bALobj.GetScheduleDetails();
 
 
+                bALobj.GetStoreScheduleDetails();
+
                 exceptions.FileText("Step End");
                 //  Console.WriteLine("New Process Complete...");
             }

@@ -9,6 +9,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TicketScheduleJob.Model;
 
 namespace TicketScheduleJob
 {
@@ -92,6 +93,63 @@ namespace TicketScheduleJob
 
         }
 
+
+        #region Store Reports
+
+        public void GetStoreScheduleDetails()
+        {
+            try
+            {
+                exceptions.FileText("Step BAL 1 Start");
+
+                List<TicketScheduleModal> ListTicketScheduleModal = new List<TicketScheduleModal>();
+                ListTicketScheduleModal = getdata.getStoreScheduleDetails();
+
+                if (ListTicketScheduleModal.Count > 0)
+                {
+                    for (int i = 0; i < ListTicketScheduleModal.Count; i++)
+                    {
+                        if (!String.IsNullOrEmpty(ListTicketScheduleModal[i].SearchInputParams))
+                        {
+
+                                StoreReportModel searchparams = new StoreReportModel();
+                                 searchparams = JsonConvert.DeserializeObject<StoreReportModel>(ListTicketScheduleModal[i].SearchInputParams);
+                                searchparams.TenantID = ListTicketScheduleModal[i].TenantID;
+                                ListTicketScheduleModal[i].SearchOutputFileName = GetStoreReportSearch(searchparams, ListTicketScheduleModal[i].CreatedBy, ListTicketScheduleModal[i].TenantID);
+                                ListTicketScheduleModal[i].Alert_TypeID = 1;
+
+
+
+                            ListTicketScheduleModal[i].SMTPDetails = getdata.GetSMTPDetails(ListTicketScheduleModal[i].TenantID);
+
+                            getdata.GetSoreMailContent(ListTicketScheduleModal[i]);
+                        }
+                    }
+                }
+
+                if (ListTicketScheduleModal.Count > 0)
+                {
+                    for (int i = 0; i < ListTicketScheduleModal.Count; i++)
+                    {
+                        if (!String.IsNullOrEmpty(ListTicketScheduleModal[i].SearchInputParams))
+                        {
+                            Task t = ProcessToSendMail(ListTicketScheduleModal[i]);
+                            t.Wait();
+                        }
+                    }
+                }
+
+                exceptions.FileText("Step BAL 1 End");
+            }
+            catch (Exception ex)
+            {
+                exceptions.SendErrorToText(ex);
+            }
+
+        }
+
+        #endregion
+
         public async Task ProcessToSendMail(TicketScheduleModal ticketschedulemodal)
         {
             try
@@ -117,7 +175,7 @@ namespace TicketScheduleJob
                 exceptions.FileText("Step BAL 3 Start");
                 _searchResult = getdata.GetDashboardTicketsOnSearch(searchparams);
 
-                SearchOutputFileName = DashboardCreateExcel(_searchResult, CreatedBy, TenantID);
+                SearchOutputFileName = StoreReportCreateExcel(_searchResult, CreatedBy, TenantID, "DashBoard", "totalpages,ClaimStatus,createdago,assignedago,updatedago,responseTimeRemainingBy,responseOverdueBy,resolutionOverdueBy");
                 exceptions.FileText("Step BAL 3 End");
             }
             catch (Exception ex)
@@ -188,7 +246,7 @@ namespace TicketScheduleJob
 
                 _searchResult = getdata.GetTicketsOnSearch(searchModel);
 
-                SearchOutputFileName = TicketsCreateExcel(_searchResult, CreatedBy, TenantID);
+                SearchOutputFileName = StoreReportCreateExcel(_searchResult, CreatedBy, TenantID, "Tickets", "totalpages,ClaimStatus,createdago,assignedago,updatedago,responseTimeRemainingBy,responseOverdueBy,resolutionOverdueBy");
 
                 exceptions.FileText("Step BAL 6 End");
             }
@@ -248,6 +306,7 @@ namespace TicketScheduleJob
 
         #endregion
 
+
         #region  ReportService
 
         private string GetReportSearch(ReportSearchModel searchModel, int CreatedBy, int TenantID)
@@ -260,7 +319,7 @@ namespace TicketScheduleJob
 
                 _searchResult = getdata.GetReportSearch(searchModel);
 
-                SearchOutputFileName = ReportCreateExcel(_searchResult, CreatedBy, TenantID);
+                SearchOutputFileName = StoreReportCreateExcel(_searchResult, CreatedBy, TenantID, "Report", "totalpages,ClaimStatus,createdago,assignedago,updatedago,responseTimeRemainingBy,responseOverdueBy,resolutionOverdueBy");
 
                 exceptions.FileText("Step BAL 9 End");
             }
@@ -324,6 +383,147 @@ namespace TicketScheduleJob
               //  exceptions.FileText("Step BAL 11.8");
                 exceptions.FileText("Search output filename start");
                 SearchOutputFileName = GetNameOfExcel(CreatedBy, TenantID, "Report");
+                exceptions.FileText("Search output filename end");
+                Thread.Sleep(5000);
+                wb.SaveAs(SearchOutputFileName);
+                exceptions.FileText("WS Save");
+                Thread.Sleep(5000);
+                exceptions.FileText("Step BAL 11 End");
+            }
+            catch (Exception ex)
+            {
+                exceptions.SendErrorToText(ex);
+            }
+            return SearchOutputFileName;
+        }
+
+        #endregion
+
+
+
+        #region Store reportService
+
+        private string GetStoreReportSearch(StoreReportModel searchModel, int CreatedBy, int TenantID)
+        {
+            SearchStoreResponseReport _searchResult = null;
+            string SearchOutputFileName = null;
+            List<SearchStoreTaskReportResponse> TaskReport = new List<SearchStoreTaskReportResponse>();
+            List<SearchStoreClaimReportResponse> ClaimReport = new List<SearchStoreClaimReportResponse>();
+            List<SearchStoreCampaignReportResponse> CampaignReport = new List<SearchStoreCampaignReportResponse>();
+            try
+            {
+                exceptions.FileText("Step BAL 9 Start");
+
+                _searchResult = getdata.GetStoreReportSearch(searchModel);
+
+                if (searchModel.ActiveTabId.Equals(1))
+                {
+                    TaskReport = _searchResult.TaskReport;
+                    SearchOutputFileName = StoreReportCreateExcel(TaskReport, CreatedBy, TenantID, "StoreReportTask");
+                }
+                else if(searchModel.ActiveTabId.Equals(2))
+                {
+                    ClaimReport = _searchResult.ClaimReport;
+                    SearchOutputFileName = StoreReportCreateExcel(ClaimReport, CreatedBy, TenantID, "StoreReportClaim");
+                }
+                else
+                {
+                    CampaignReport = _searchResult.CampaignReport;
+                    SearchOutputFileName = StoreReportCreateExcel(CampaignReport, CreatedBy, TenantID, "StoreReportCampaign");
+                }
+
+
+                exceptions.FileText("Step BAL 9 End");
+            }
+            catch (Exception ex)
+            {
+                exceptions.SendErrorToText(ex);
+            }
+            return SearchOutputFileName;
+        }
+
+        private string StoreReportCreateExcel<T>(List<T> list, int CreatedBy, int TenantID, string Schedulefrom, string ExcludeColumns = "")
+        {
+            string SearchOutputFileName = null;
+            try
+            {
+                exceptions.FileText("Step BAL 12 Start");
+                var wb = new XLWorkbook();
+                var ws = wb.Worksheets.Add(Schedulefrom);
+                Thread.Sleep(5000);
+
+                int lineno = 1;
+
+                Type type = list[0].GetType();
+                var props = type.GetProperties();
+                List<string> propsvallist = props.Select(p => p.Name).ToList();
+
+                
+
+                int minusheaderrow = 0;
+                for (int i = 0; i < propsvallist.Count; i++)
+                {
+                    if (string.IsNullOrEmpty(ExcludeColumns))
+                    {
+                        ws.Cell(lineno, i + 1).Value = propsvallist[i];
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(ExcludeColumns))
+                        {
+                            if (!ExcludeColumns.ToLower().Contains(propsvallist[i].ToLower()))
+                            {
+                                ws.Cell(lineno, i + 1 + minusheaderrow).Value = propsvallist[i];
+                            }
+                            else
+                            {
+                                minusheaderrow--;
+                            }
+                        }
+                    }
+                }
+                Thread.Sleep(5000);
+                lineno = lineno + 1;
+
+                // List<string> propsvallistvalue = props.Select(p => p.Name).ToList();
+                //int j = 0;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    int minusrow = 0;
+                    //foreach (var propertyInfo in props)
+                    for (int j = 0; j < props.Length; j++)
+                    {
+                        if (string.IsNullOrEmpty(ExcludeColumns))
+                        {
+                            ws.Cell(lineno, j + 1).Value = props[j].GetValue(list[i], null);
+                        }
+                        else
+                        {
+                            if (!ExcludeColumns.ToLower().Contains(props[j].Name.ToLower()))
+                            {
+                                ws.Cell(lineno, j + 1 + minusrow).Value = props[j].GetValue(list[i], null);
+                            }
+                            else
+                            {
+                                minusrow--;
+                            }
+                        }
+                    }
+                    lineno++;
+                }
+
+                exceptions.FileText("Step BAL 12.5 Start");
+                Thread.Sleep(5000);
+
+                // Beautify
+                exceptions.FileText("Step BAL 12.6");
+                //ws.Range("A1:G1").Style.Font.Bold = true;
+                ws.Range(1,1,1, propsvallist.Count).Style.Font.Bold = true;
+                exceptions.FileText("Step BAL 12.7");
+                // ws.Columns().AdjustToContents();
+                //  exceptions.FileText("Step BAL 11.8");
+                exceptions.FileText("Search output filename start");
+                SearchOutputFileName = GetNameOfExcel(CreatedBy, TenantID, Schedulefrom);
                 exceptions.FileText("Search output filename end");
                 Thread.Sleep(5000);
                 wb.SaveAs(SearchOutputFileName);

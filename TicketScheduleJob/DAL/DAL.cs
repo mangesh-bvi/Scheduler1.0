@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
-
+using TicketScheduleJob.Model;
 
 namespace TicketScheduleJob
 {
@@ -108,6 +108,94 @@ namespace TicketScheduleJob
 
             return ticketschedulemodal;
         }
+
+
+        #region Store Reports
+
+        public List<TicketScheduleModal> getStoreScheduleDetails()
+        {
+            DataSet ds = new DataSet();
+            List<TicketScheduleModal> ticketschedulemodal = new List<TicketScheduleModal>();
+
+            try
+            {
+                exceptions.FileText("Step DAL 2 Start");
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand("get_StoreScheduleSearchDetails", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                MySqlDataAdapter da = new MySqlDataAdapter();
+                da.SelectCommand = cmd;
+                da.Fill(ds);
+                if (ds != null && ds.Tables[0] != null)
+                {
+                    if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+                    {
+                        foreach (DataRow dr in ds.Tables[0].Rows)
+                        {
+                            TicketScheduleModal obj = new TicketScheduleModal()
+                            {
+                                ScheduleID = dr["ScheduleID"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["ScheduleID"]),
+                                TenantID = dr["TenantID"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["TenantID"]),
+                                ScheduleFor = dr["ScheduleFor"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["ScheduleFor"]),
+                                ScheduleType = dr["ScheduleType"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["ScheduleType"]),
+                                ScheduleTime = Convert.ToString(dr["ScheduleTime"]),
+                                IsDaily = Convert.ToBoolean(dr["IsDaily"]),
+                                NoOfDay = dr["NoOfDay"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["NoOfDay"]),
+                                IsWeekly = Convert.ToBoolean(dr["IsWeekly"]),
+                                NoOfWeek = dr["NoOfWeek"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["NoOfWeek"]),
+                                DayIds = dr["DayIds"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["DayIds"]),
+                                IsDailyForMonth = Convert.ToBoolean(dr["IsDailyForMonth"]),
+                                NoOfDaysForMonth = dr["NoOfDaysForMonth"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["NoOfDaysForMonth"]),
+                                NoOfMonthForMonth = dr["NoOfMonthForMonth"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["NoOfMonthForMonth"]),
+                                IsWeeklyForMonth = Convert.ToBoolean(dr["IsWeeklyForMonth"]),
+                                NoOfMonthForWeek = dr["NoOfMonthForWeek"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["NoOfMonthForWeek"]),
+                                NoOfWeekForWeek = dr["NoOfWeekForWeek"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["NoOfWeekForWeek"]),
+                                NameOfDayForWeek = dr["NameOfDayForWeek"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["NameOfDayForWeek"]),
+                                IsWeeklyForYear = Convert.ToBoolean(dr["IsWeeklyForYear"]),
+                                NoOfWeekForYear = dr["NoOfWeekForYear"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["NoOfWeekForYear"]),
+                                NameOfDayForYear = dr["NameOfDayForYear"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["NameOfDayForYear"]),
+                                NameOfMonthForYear = dr["NameOfMonthForYear"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["NameOfMonthForYear"]),
+                                IsDailyForYear = Convert.ToBoolean(dr["IsDailyForYear"]),
+                                NameOfMonthForDailyYear = dr["NameOfMonthForDailyYear"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["NameOfMonthForDailyYear"]),
+                                NoOfDayForDailyYear = dr["NoOfDayForDailyYear"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["NoOfDayForDailyYear"]),
+                                SearchInputParams = dr["SearchInputParams"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["SearchInputParams"]),
+                                IsActive = Convert.ToBoolean(dr["IsActive"]),
+                                CreatedBy = dr["CreatedBy"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["CreatedBy"]),
+                                CreatedDate = Convert.ToDateTime(dr["CreatedDate"]),
+                                ModifyBy = dr["ModifyBy"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["ModifyBy"]),
+                                ModifyDate = Convert.ToDateTime(dr["ModifyDate"]),
+                                CreatedByEmailId = dr["CreatedByEmailId"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["CreatedByEmailId"]),
+                                CreatedByFirstName = dr["CreatedByFirstName"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["CreatedByFirstName"]),
+                                CreatedByLastName = dr["CreatedByLastName"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["CreatedByLastName"]),
+                                SendToEmailID = dr["SendToEmailID"] == System.DBNull.Value ? string.Empty : Convert.ToString(dr["SendToEmailID"]),
+                                ScheduleFrom = dr["ScheduleFrom"] == System.DBNull.Value ? 0 : Convert.ToInt32(dr["ScheduleFrom"])
+                            };
+
+                            ticketschedulemodal.Add(obj);
+                        }
+
+
+                    }
+                }
+
+                exceptions.FileText("Step DAL 2 End");
+            }
+            catch (Exception ex)
+            {
+                exceptions.SendErrorToText(ex);
+            }
+            finally
+            {
+                if (ds != null)
+                    ds.Dispose();
+                conn.Close();
+            }
+
+            return ticketschedulemodal;
+        }
+
+        #endregion
+
 
 
         #region  DashboardTickets
@@ -779,6 +867,223 @@ namespace TicketScheduleJob
 
         #endregion
 
+
+        #region  StoreReportService
+
+        public SearchStoreResponseReport GetStoreReportSearch(StoreReportModel searchModel)
+        {
+            DataSet ds = new DataSet();
+            MySqlCommand cmd = new MySqlCommand();
+
+
+            List<string> CountList = new List<string>();
+
+            SearchStoreResponseReport objSearchResult = new SearchStoreResponseReport();
+            List<SearchStoreTaskReportResponse> TaskReport = new List<SearchStoreTaskReportResponse>();
+            List<SearchStoreClaimReportResponse> ClaimReport = new List<SearchStoreClaimReportResponse>();
+            List<SearchStoreCampaignReportResponse> CampaignReport = new List<SearchStoreCampaignReportResponse>();
+
+            try
+            {
+                exceptions.FileText("Step DAL 10 Start");
+                if (conn != null && conn.State == ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+                cmd.Connection = conn;
+
+                cmd = new MySqlCommand("SP_ScheduleStoreReportForDownload", conn);
+                cmd.Connection = conn;
+                cmd.Parameters.AddWithValue("@_TenantID", searchModel.TenantID);
+                cmd.Parameters.AddWithValue("@_ActiveTabID", searchModel.ActiveTabId);
+
+                /*------------------ TASK PARAMETERS ------------------------------*/
+
+                cmd.Parameters.AddWithValue("@_TaskTitle", string.IsNullOrEmpty(searchModel.TaskTitle) ? "" : searchModel.TaskTitle);
+                cmd.Parameters.AddWithValue("@_TaskStatus", string.IsNullOrEmpty(searchModel.TaskStatus) ? "" : searchModel.TaskStatus.TrimEnd(','));
+                cmd.Parameters.AddWithValue("@_IsTaskWithTicket", Convert.ToInt16(searchModel.IsTaskWithTicket));
+                cmd.Parameters.AddWithValue("@_TaskTicketID", searchModel.TaskTicketID);
+                cmd.Parameters.AddWithValue("@_DepartmentIds", string.IsNullOrEmpty(searchModel.DepartmentIds) ? "" : searchModel.DepartmentIds.TrimEnd(','));
+                cmd.Parameters.AddWithValue("@_FunctionIds", string.IsNullOrEmpty(searchModel.FunctionIds) ? "" : searchModel.FunctionIds.TrimEnd(','));
+                cmd.Parameters.AddWithValue("@_PriorityIds", string.IsNullOrEmpty(searchModel.PriorityIds) ? "" : searchModel.PriorityIds.TrimEnd(','));
+                cmd.Parameters.AddWithValue("@_IsTaskWithClaim", Convert.ToInt16(searchModel.IsTaskWithClaim));
+                cmd.Parameters.AddWithValue("@_TaskClaimID", searchModel.TaskClaimID);
+                cmd.Parameters.AddWithValue("@_TaskCreatedDate", string.IsNullOrEmpty(searchModel.TaskCreatedDate) ? "" : searchModel.TaskCreatedDate);
+                cmd.Parameters.AddWithValue("@_TaskCreatedBy",  searchModel.TaskCreatedBy);
+                cmd.Parameters.AddWithValue("@_TaskAssignedId", searchModel.TaskAssignedId);
+
+                /*------------------ ENDS HERE-------------------------------*/
+
+                /*------------------ CLAIM  PARAMETERS------------------------------*/
+
+                cmd.Parameters.AddWithValue("@_ClaimID", searchModel.ClaimID);
+                cmd.Parameters.AddWithValue("@_ClaimStatus", string.IsNullOrEmpty(searchModel.ClaimStatus) ? "" : searchModel.ClaimStatus.TrimEnd(','));
+                cmd.Parameters.AddWithValue("@_IsClaimWithTicket", Convert.ToInt16(searchModel.IsClaimWithTicket));
+                cmd.Parameters.AddWithValue("@_ClaimTicketID", searchModel.ClaimTicketID);
+                cmd.Parameters.AddWithValue("@_ClaimCategoryIds", string.IsNullOrEmpty(searchModel.ClaimCategoryIds) ? "" : searchModel.ClaimCategoryIds.TrimEnd(','));
+                cmd.Parameters.AddWithValue("@_ClaimSubCategoryIds", string.IsNullOrEmpty(searchModel.ClaimSubCategoryIds) ? "" : searchModel.ClaimSubCategoryIds.TrimEnd(','));
+                cmd.Parameters.AddWithValue("@_ClaimIssuetypeIds", string.IsNullOrEmpty(searchModel.ClaimIssuetypeIds) ? "" : searchModel.ClaimIssuetypeIds);
+                cmd.Parameters.AddWithValue("@_IsClaimWithTask", Convert.ToInt16(searchModel.IsClaimWithTask));
+                cmd.Parameters.AddWithValue("@_ClaimTaskID", searchModel.ClaimTaskID);
+                cmd.Parameters.AddWithValue("@_ClaimCreatedDate", string.IsNullOrEmpty(searchModel.ClaimCreatedDate) ? "" : searchModel.ClaimCreatedDate);
+                cmd.Parameters.AddWithValue("@_ClaimCreatedBy", searchModel.ClaimCreatedBy);
+                cmd.Parameters.AddWithValue("@_ClaimAssignedId", searchModel.ClaimAssignedId);
+
+
+
+                /*------------------ CAMPAIGN  PARAMETERS------------------------------*/
+
+                cmd.Parameters.AddWithValue("@_CampaignName", string.IsNullOrEmpty(searchModel.CampaignName) ? "" : searchModel.CampaignName);
+                cmd.Parameters.AddWithValue("@_CampaignAssignedId", searchModel.CampaignAssignedIds);
+                cmd.Parameters.AddWithValue("@_CampaignStartDate", string.IsNullOrEmpty(searchModel.CampaignStartDate) ? "" : searchModel.CampaignStartDate);
+                cmd.Parameters.AddWithValue("@_CampaignEndDate", string.IsNullOrEmpty(searchModel.CampaignEndDate) ? "" : searchModel.CampaignEndDate);
+                cmd.Parameters.AddWithValue("@_CampaignStatusids", string.IsNullOrEmpty(searchModel.CampaignStatusids) ? "" : searchModel.CampaignStatusids.TrimEnd(','));
+
+                /*------------------ ENDS HERE-------------------------------*/
+
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                MySqlDataAdapter da = new MySqlDataAdapter();
+                da.SelectCommand = cmd;
+                da.Fill(ds);
+
+                if (ds != null && ds.Tables != null)
+                {
+                    if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+                    {
+                        if (searchModel.ActiveTabId.Equals(1))// task mapping
+                        {
+                            foreach (DataRow dr in ds.Tables[0].Rows)
+                            {
+                                SearchStoreTaskReportResponse obj = new SearchStoreTaskReportResponse()
+                                {
+                                    TaskID = Convert.ToInt32(dr["TaskID"]),
+                                    TicketID = dr["TicketID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["TicketID"]),
+                                    TicketDescription = dr["TicketDescription"] == DBNull.Value ? string.Empty : Convert.ToString(dr["TicketDescription"]),
+                                    TaskTitle = dr["TaskTitle"] == DBNull.Value ? string.Empty : Convert.ToString(dr["TaskTitle"]),
+                                    TaskDescription = dr["TaskDescription"] == DBNull.Value ? string.Empty : Convert.ToString(dr["TaskDescription"]),
+                                    DepartmentId = dr["DepartmentId"] == DBNull.Value ? 0 : Convert.ToInt32(dr["DepartmentId"]),
+                                    DepartmentName = dr["DepartmentName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["DepartmentName"]),
+                                    FunctionID = dr["FunctionID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["FunctionID"]),
+                                    FunctionName = dr["FunctionName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["FunctionName"]),
+                                    PriorityID = dr["PriorityID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["PriorityID"]),
+                                    PriorityName = dr["PriorityName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["PriorityName"]),
+                                    TaskEndTime = dr["TaskEndTime"] == DBNull.Value ? string.Empty : Convert.ToString(dr["TaskEndTime"]),
+                                    TaskStatus = dr["TaskStatus"] == DBNull.Value ? string.Empty : Convert.ToString(dr["TaskStatus"]),
+                                    CreatedBy = dr["CreatedBy"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CreatedBy"]),
+                                    CreatedByName = dr["CreatedByName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CreatedByName"]),
+                                    CreatedDate = dr["CreatedDate"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CreatedDate"]),
+                                    ModifiedBy = dr["ModifiedBy"] == DBNull.Value ? 0 : Convert.ToInt32(dr["ModifiedBy"]),
+                                    ModifiedByName = dr["ModifiedByName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ModifiedByName"]),
+                                    ModifiedDate = dr["ModifiedDate"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ModifiedDate"]),
+                                    IsActive = dr["IsActive"] == DBNull.Value ? string.Empty : Convert.ToString(dr["IsActive"]),
+
+                                };
+
+                                TaskReport.Add(obj);
+                            }
+
+                            objSearchResult.TaskReport = TaskReport;
+                        }
+                        else if (searchModel.ActiveTabId.Equals(2))// claim mapping
+                        {
+                            foreach (DataRow dr in ds.Tables[0].Rows)
+                            {
+                                SearchStoreClaimReportResponse obj = new SearchStoreClaimReportResponse()
+                                {
+                                    ClaimID = Convert.ToInt32(dr["ClaimID"]),
+                                    ClaimTitle = dr["ClaimTitle"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ClaimTitle"]),
+                                    ClaimDescription = dr["ClaimDescription"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ClaimDescription"]),
+                                    BrandID = dr["BrandID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["BrandID"]),
+                                    BrandName = dr["BrandName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["BrandName"]),
+                                    CategoryID = dr["CategoryID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CategoryID"]),
+                                    CategoryName = dr["CategoryName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CategoryName"]),
+                                    SubCategoryID = dr["SubCategoryID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["SubCategoryID"]),
+                                    SubCategoryName = dr["SubCategoryName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["SubCategoryName"]),
+
+                                    IssueTypeID = dr["IssueTypeID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["IssueTypeID"]),
+                                    IssueTypeName = dr["IssueTypeName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["IssueTypeName"]),
+                                    PriorityID = dr["PriorityID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["PriorityID"]),
+                                    PriorityName = dr["PriorityName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["PriorityName"]),
+                                    CustomerID = dr["CustomerID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CustomerID"]),
+                                    CustomerName = dr["CustomerName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CustomerName"]),
+                                    OrderMasterID = dr["OrderMasterID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["OrderMasterID"]),
+                                    OrderNo = dr["OrderNumber"] == DBNull.Value ? string.Empty : Convert.ToString(dr["OrderNumber"]),
+                                    ClaimPercent = dr["ClaimPercent"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ClaimPercent"]),
+                                    ClaimAssignedID = dr["AssignedID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["AssignedID"]),
+                                    AssignedToName = dr["AssignedToName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["AssignedToName"]),
+                                    ClaimStatus = dr["ClaimStatus"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ClaimStatus"]),
+
+                                    IsActive = dr["IsActive"] == DBNull.Value ? string.Empty : Convert.ToString(dr["IsActive"]),
+                                    ClaimApproved = dr["ClaimApproved"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ClaimApproved"]),
+                                    ClaimRejected = dr["ClaimRejected"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ClaimRejected"]),
+                                    CreatedBy = dr["CreatedBy"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CreatedBy"]),
+                                    CreatedByName = dr["CreatedByName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CreatedByName"]),
+                                    CreatedDate = dr["CreatedDate"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CreatedDate"]),
+                                    ModifiedBy = dr["ModifiedBy"] == DBNull.Value ? 0 : Convert.ToInt32(dr["ModifiedBy"]),
+                                    ModifiedByName = dr["ModifiedByName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ModifiedByName"]),
+                                    ModifiedDate = dr["ModifiedDate"] == DBNull.Value ? string.Empty : Convert.ToString(dr["ModifiedDate"]),
+                                    IsClaimEscalated = dr["IsClaimEscalated"] == DBNull.Value ? string.Empty : Convert.ToString(dr["IsClaimEscalated"]),
+                                    IsCustomerResponseDone = dr["IsCustomerResponseDone"] == DBNull.Value ? string.Empty : Convert.ToString(dr["IsCustomerResponseDone"]),
+                                    CustomerResponsedOn = dr["CustomerResponsedOn"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CustomerResponsedOn"]),
+                                    FinalClaimPercent = dr["FinalClaimPercent"] == DBNull.Value ? string.Empty : Convert.ToString(dr["FinalClaimPercent"]),
+                                    TicketDescription = dr["TicketDescription"] == DBNull.Value ? string.Empty : Convert.ToString(dr["TicketDescription"]),
+                                    TaskDescription = dr["TaskDescription"] == DBNull.Value ? string.Empty : Convert.ToString(dr["TaskDescription"]),
+
+
+                                };
+                                ClaimReport.Add(obj);
+                            }
+                            objSearchResult.ClaimReport = ClaimReport;
+                        }
+                        else// campaign mapping
+                        {
+                            foreach (DataRow dr in ds.Tables[0].Rows)
+                            {
+                                SearchStoreCampaignReportResponse obj = new SearchStoreCampaignReportResponse()
+                                {
+                                    CampaignCustomerID = dr["CampaignCustomerID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CampaignCustomerID"]),
+                                    CustomerID = dr["CustomerID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CustomerID"]),
+                                    CustomerName = dr["CustomerName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CustomerName"]),
+                                    CampaignTypeID = dr["CampaignTypeID"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CampaignTypeID"]),
+                                    CampaignName = dr["CampaignName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CampaignName"]),
+                                    CampaignTypeDate = dr["CampaignTypeDate"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CampaignTypeDate"]),
+                                    CallReScheduledTo = dr["CallReScheduledTo"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CallReScheduledTo"]),
+                                    CreatedBy = dr["CreatedBy"] == DBNull.Value ? 0 : Convert.ToInt32(dr["CreatedBy"]),
+                                    CreatedByName = dr["CreatedByName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CreatedByName"]),
+
+                                    CampaignStatus = dr["CampaignStatus"] == DBNull.Value ? string.Empty : Convert.ToString(dr["CampaignStatus"]),
+                                    AssignedTo = dr["AssignedTo"] == DBNull.Value ? 0 : Convert.ToInt32(dr["AssignedTo"]),
+                                    AssignedToName = dr["AssignedToName"] == DBNull.Value ? string.Empty : Convert.ToString(dr["AssignedToName"]),
+                                    Response = dr["Response"] == DBNull.Value ? string.Empty : Convert.ToString(dr["Response"]),
+                                    NoOfTimesNotContacted = dr["Response"] == DBNull.Value ? 0 : Convert.ToInt32(dr["NoOfTimesNotContacted"]),
+
+                                };
+                                CampaignReport.Add(obj);
+                            }
+
+                            objSearchResult.CampaignReport = CampaignReport;
+                        }
+                    }
+                }
+
+                exceptions.FileText("Step DAL 10 End");
+            }
+            catch (Exception ex)
+            {
+                exceptions.SendErrorToText(ex);
+            }
+            finally
+            {
+                if (ds != null) ds.Dispose(); conn.Close();
+            }
+            return objSearchResult;
+        }
+
+        #endregion
+
+
         public SMTPDetails GetSMTPDetails(int TenantID)
         {
             DataSet ds = new DataSet();
@@ -848,6 +1153,48 @@ namespace TicketScheduleJob
                     ticketschedulemodal.Emailbody =  Convert.ToString(ds.Tables[0].Rows[0]["Content"]);
                    // ticketschedulemodal.Emailbody = ticketschedulemodal.Emailbody.Replace("@ScheduledBy", ticketschedulemodal.CreatedByFirstName + " " + ticketschedulemodal.CreatedByLastName);
                    // ticketschedulemodal.Emailbody = ticketschedulemodal.Emailbody.Replace("@ScheduledTime", ticketschedulemodal.ScheduleTime);
+
+                    ticketschedulemodal.Emailsubject = Convert.ToString(ds.Tables[0].Rows[0]["Subject"]);
+                }
+
+                exceptions.FileText("Step DAL 13 End");
+            }
+            catch (Exception ex)
+            {
+                exceptions.SendErrorToText(ex);
+            }
+            finally
+            {
+
+                if (ds != null)
+                    ds.Dispose(); conn.Close();
+            }
+
+        }
+
+        public void GetSoreMailContent(TicketScheduleModal ticketschedulemodal)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                exceptions.FileText("Step DAL 13 Start");
+
+                MySqlCommand cmd = new MySqlCommand();
+
+                conn.Open();
+                cmd.Connection = conn;
+                MySqlCommand cmd1 = new MySqlCommand("SP_getStoreMailContent", conn);
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.AddWithValue("@Alert_TypeID", ticketschedulemodal.Alert_TypeID);
+                cmd1.Parameters.AddWithValue("@_ScheduleID", ticketschedulemodal.ScheduleID);
+                MySqlDataAdapter da = new MySqlDataAdapter();
+                da.SelectCommand = cmd1;
+                da.Fill(ds);
+                if (ds != null && ds.Tables[0] != null)
+                {
+                    ticketschedulemodal.Emailbody = Convert.ToString(ds.Tables[0].Rows[0]["Content"]);
+                    // ticketschedulemodal.Emailbody = ticketschedulemodal.Emailbody.Replace("@ScheduledBy", ticketschedulemodal.CreatedByFirstName + " " + ticketschedulemodal.CreatedByLastName);
+                    // ticketschedulemodal.Emailbody = ticketschedulemodal.Emailbody.Replace("@ScheduledTime", ticketschedulemodal.ScheduleTime);
 
                     ticketschedulemodal.Emailsubject = Convert.ToString(ds.Tables[0].Rows[0]["Subject"]);
                 }

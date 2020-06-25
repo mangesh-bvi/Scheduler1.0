@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
 using System;
+using System.Data;
 using System.IO;
 using System.Threading;
 using System.Timers;
@@ -25,17 +27,14 @@ namespace TicketScheduleJob
             {
                 MySettingsConfigMoal mysettingsconfigmoal = new MySettingsConfigMoal();
                 mysettingsconfigmoal = GetConfigDetails();
-                // Console.WriteLine("Scheduler Started");
-                //GetScheduleDetails();
+               
 
-                double intervalInMinutes = Convert.ToDouble(mysettingsconfigmoal.IntervalInMinutes);// 60 * 5000; // milliseconds to one min
+                double intervalInMinutes = Convert.ToDouble(mysettingsconfigmoal.IntervalInMinutes);
 
-                Thread _Individualprocessthread = new Thread(new ThreadStart(CallEveryMin));
+                Thread _Individualprocessthread = new Thread(new ThreadStart(InvokeMethod));
                 _Individualprocessthread.Start();
 
-                //Timer checkForTime = new Timer(intervalInMinutes);
-                //checkForTime.Elapsed += new ElapsedEventHandler(GetScheduleDetails);
-                //checkForTime.Enabled = true;
+              
             }
             catch (Exception ex)
             {
@@ -44,43 +43,54 @@ namespace TicketScheduleJob
 
         }
 
-        public void CallEveryMin()
+        public  void InvokeMethod()
         {
-            MySettingsConfigMoal mysettingsconfigmoal = new MySettingsConfigMoal();
-            mysettingsconfigmoal = GetConfigDetails();
+            var builder = new ConfigurationBuilder()
+               .SetBasePath(Directory.GetCurrentDirectory())
+               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+               .AddUserSecrets<Program>()
+               .AddEnvironmentVariables();
 
-            int intervalInMinutes = Convert.ToInt32(mysettingsconfigmoal.IntervalInMinutes);// 60 * 5000; // milliseconds to one min
+            IConfigurationRoot configuration = builder.Build();
+            var mySettingsConfig = new MySettingsConfig();
+            configuration.GetSection("MySettings").Bind(mySettingsConfig);
 
+            string interval = mySettingsConfig.IntervalInMinutes;
+
+            int intervalInMinutes = Convert.ToInt32(interval);
+           
             while (true)
             {
-                GetScheduleDetails();
+                GetConnectionStrings();
+
                 Thread.Sleep(intervalInMinutes);
             }
         }
 
+        public void CallEveryMin(string ConString)
+        {
+            MySettingsConfigMoal mysettingsconfigmoal = new MySettingsConfigMoal();
+            mysettingsconfigmoal = GetConfigDetails();
 
-        public void GetScheduleDetails()
-        //public void GetScheduleDetails()
+            int intervalInMinutes = Convert.ToInt32(mysettingsconfigmoal.IntervalInMinutes);
+            GetScheduleDetails(ConString);
+                
+        }
+
+
+        public void GetScheduleDetails(string ConString)
         {
             Exceptions exceptions = null;
             try
             {
 
                 exceptions = new Exceptions();
-
-                //  Console.WriteLine("New Process is going on... please wait...");
-
                 exceptions.FileText("Step Start");
-
                 BAL bALobj = new BAL();
-
-                bALobj.GetScheduleDetails();
-
-
-                bALobj.GetStoreScheduleDetails();
-
+                bALobj.GetScheduleDetails(ConString);
+                bALobj.GetStoreScheduleDetails(ConString);
                 exceptions.FileText("Step End");
-                //  Console.WriteLine("New Process Complete...");
+               
             }
             catch (Exception ex)
             {
@@ -112,10 +122,61 @@ namespace TicketScheduleJob
             }
             catch (Exception ex)
             {
-                // Console.WriteLine("Error getting data from appsetting.json");
+               
             }
 
             return MySettingsConfigMoal;
+        }
+
+
+        public void GetConnectionStrings()
+        {
+            string ServerName = string.Empty;
+            string ServerCredentailsUsername = string.Empty;
+            string ServerCredentailsPassword = string.Empty;
+            string DBConnection = string.Empty;
+
+
+            try
+            {
+                DataTable dt = new DataTable();
+                IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true).Build();
+                var constr = config.GetSection("ConnectionStrings").GetSection("DefaultConnection").Value;
+                MySqlConnection con = new MySqlConnection(constr);
+                MySqlCommand cmd = new MySqlCommand("SP_HSGetAllConnectionstrings", con);
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Connection.Open();
+                MySqlDataAdapter da = new MySqlDataAdapter(cmd);
+                da.Fill(dt);
+                cmd.Connection.Close();
+
+                if (dt.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        DataRow dr = dt.Rows[i];
+                        ServerName = Convert.ToString(dr["ServerName"]);
+                        ServerCredentailsUsername = Convert.ToString(dr["ServerCredentailsUsername"]);
+                        ServerCredentailsPassword = Convert.ToString(dr["ServerCredentailsPassword"]);
+                        DBConnection = Convert.ToString(dr["DBConnection"]);
+
+                        string ConString = "Data Source = " + ServerName + " ; port = " + 3306 + "; Initial Catalog = " + DBConnection + " ; User Id = " + ServerCredentailsUsername + "; password = " + ServerCredentailsPassword + "";
+                        CallEveryMin(ConString);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+
+            }
+            finally
+            {
+
+                GC.Collect();
+            }
+
+
         }
     }
 }

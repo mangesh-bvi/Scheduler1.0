@@ -13,7 +13,7 @@ namespace TicketScheduleJob
     public class DAL
     {
        
-        public static MySqlConnection conn = null;
+        public static MySqlConnection con = null;
 
         static Exceptions exceptions;
         static DAL()
@@ -22,12 +22,12 @@ namespace TicketScheduleJob
             Program obj = new Program();
             mysettingsconfigmoal = obj.GetConfigDetails();
 
-            conn = new MySqlConnection(mysettingsconfigmoal.Connectionstring);
+            con = new MySqlConnection(mysettingsconfigmoal.Connectionstring);
             exceptions = new Exceptions();
         }
 
 
-        public List<TicketScheduleModal> getScheduleDetails()
+        public List<TicketScheduleModal> getScheduleDetails(string ConString)
         {
             DataSet ds = new DataSet();
             List<TicketScheduleModal> ticketschedulemodal = new List<TicketScheduleModal>();
@@ -35,12 +35,15 @@ namespace TicketScheduleJob
             try
             {
                 exceptions.FileText("Step DAL 2 Start");
-                conn.Open();
-                MySqlCommand cmd = new MySqlCommand("get_ScheduleSearchDetails", conn);
+                //conn.Open();
+                MySqlConnection con = new MySqlConnection(ConString);
+                MySqlCommand cmd = new MySqlCommand("get_ScheduleSearchDetails", con);
                 cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Connection.Open();
                 MySqlDataAdapter da = new MySqlDataAdapter();
                 da.SelectCommand = cmd;
                 da.Fill(ds);
+                cmd.Connection.Close();
                 if (ds != null && ds.Tables[0] != null)
                 {
                     if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
@@ -103,7 +106,7 @@ namespace TicketScheduleJob
             {
                 if (ds != null)
                     ds.Dispose();
-                conn.Close();
+                con.Close();
             }
 
             return ticketschedulemodal;
@@ -112,7 +115,7 @@ namespace TicketScheduleJob
 
         #region Store Reports
 
-        public List<TicketScheduleModal> getStoreScheduleDetails()
+        public List<TicketScheduleModal> getStoreScheduleDetails(string ConString)
         {
             DataSet ds = new DataSet();
             List<TicketScheduleModal> ticketschedulemodal = new List<TicketScheduleModal>();
@@ -120,12 +123,15 @@ namespace TicketScheduleJob
             try
             {
                 exceptions.FileText("Step DAL 2 Start");
-                conn.Open();
-                MySqlCommand cmd = new MySqlCommand("get_StoreScheduleSearchDetails", conn);
+                //conn.Open();
+                MySqlConnection con = new MySqlConnection(ConString);
+                MySqlCommand cmd = new MySqlCommand("get_StoreScheduleSearchDetails", con);
                 cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Connection.Open();
                 MySqlDataAdapter da = new MySqlDataAdapter();
                 da.SelectCommand = cmd;
                 da.Fill(ds);
+                cmd.Connection.Close();
                 if (ds != null && ds.Tables[0] != null)
                 {
                     if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
@@ -188,7 +194,7 @@ namespace TicketScheduleJob
             {
                 if (ds != null)
                     ds.Dispose();
-                conn.Close();
+                con.Close();
             }
 
             return ticketschedulemodal;
@@ -200,10 +206,12 @@ namespace TicketScheduleJob
 
         #region  DashboardTickets
 
-        public List<SearchOutputDashBoard> GetDashboardTicketsOnSearch(SearchInputModel searchModel)
+        public List<SearchOutputDashBoard> GetDashboardTicketsOnSearch(SearchInputModel searchModel,string ConString)
         {
             DataSet ds = new DataSet();
+            MySqlConnection con = new MySqlConnection(ConString);
             MySqlCommand cmd = new MySqlCommand();
+
             List<SearchOutputDashBoard> objSearchResult = new List<SearchOutputDashBoard>();
 
             List<string> CountList = new List<string>();
@@ -214,11 +222,11 @@ namespace TicketScheduleJob
 
                 exceptions.FileText("Step DAL 4 Start");
 
-                if (conn != null && conn.State == ConnectionState.Closed)
+                if (con != null && con.State == ConnectionState.Closed)
                 {
-                    conn.Open();
+                    con.Open();
                 }
-                cmd.Connection = conn;
+                cmd.Connection = con;
 
                 /*Based on active tab stored procedure will call
                     1. SP_SearchTicketData_ByDate
@@ -227,7 +235,7 @@ namespace TicketScheduleJob
                     4. SP_SearchTicketData_ByCategoryType
                     5. SP_SearchTicketData_ByAll                 
                  */
-                MySqlCommand sqlcmd = new MySqlCommand("", conn);
+                MySqlCommand sqlcmd = new MySqlCommand("", con);
 
                 // sqlcmd.Parameters.AddWithValue("HeaderStatus_Id", searchModel.HeaderStatusId);
 
@@ -389,7 +397,7 @@ namespace TicketScheduleJob
             }
             finally
             {
-                if (ds != null) ds.Dispose(); conn.Close();
+                if (ds != null) ds.Dispose(); con.Close();
             }
             return objSearchResult;
         }
@@ -530,9 +538,10 @@ namespace TicketScheduleJob
 
         #region  Tickets
 
-        public List<SearchResponse> GetTicketsOnSearch(SearchTicketModel searchModel)
+        public List<SearchResponse> GetTicketsOnSearch(SearchTicketModel searchModel,string ConString)
         {
             DataSet ds = new DataSet();
+            MySqlConnection con = new MySqlConnection(ConString);
             MySqlCommand cmd = new MySqlCommand();
             List<SearchResponse> objSearchResult = new List<SearchResponse>();
             List<SearchResponse> temp = new List<SearchResponse>(); //delete later
@@ -543,12 +552,12 @@ namespace TicketScheduleJob
             {
                 exceptions.FileText("Step DAL 7 Start");
 
-                if (conn != null && conn.State == ConnectionState.Closed)
+                if (con != null && con.State == ConnectionState.Closed)
                 {
-                    conn.Open();
+                    con.Open();
                 }
 
-                cmd.Connection = conn;
+                cmd.Connection = con;
 
                 /*Based on active tab stored procedure will call
                     1. SP_SearchTicketData_ByDate
@@ -557,7 +566,7 @@ namespace TicketScheduleJob
                     4. SP_SearchTicketData_ByCategoryType
                     5. SP_SearchTicketData_ByAll                 
                  */
-                MySqlCommand sqlcmd = new MySqlCommand("", conn);
+                MySqlCommand sqlcmd = new MySqlCommand("", con);
 
                 sqlcmd.Parameters.AddWithValue("HeaderStatus_Id", searchModel.HeaderStatusId);
 
@@ -721,7 +730,7 @@ namespace TicketScheduleJob
             }
             finally
             {
-                if (ds != null) ds.Dispose(); conn.Close();
+                if (ds != null) ds.Dispose(); con.Close();
             }
             return objSearchResult;
         }
@@ -730,9 +739,10 @@ namespace TicketScheduleJob
 
         #region  ReportService
 
-        public List<SearchResponseReport> GetReportSearch(ReportSearchModel searchModel)
+        public List<SearchResponseReport> GetReportSearch(ReportSearchModel searchModel,string ConString)
         {
             DataSet ds = new DataSet();
+            MySqlConnection con = new MySqlConnection(ConString);
             MySqlCommand cmd = new MySqlCommand();
             List<SearchResponseReport> objSearchResult = new List<SearchResponseReport>();
 
@@ -742,11 +752,11 @@ namespace TicketScheduleJob
             try
             {
                 exceptions.FileText("Step DAL 10 Start");
-                if (conn != null && conn.State == ConnectionState.Closed)
+                if (con != null && con.State == ConnectionState.Closed)
                 {
-                    conn.Open();
+                    con.Open();
                 }
-                cmd.Connection = conn;
+                cmd.Connection = con;
 
                 /*Based on active tab stored procedure will call
                     1. SP_SearchTicketData_ByDate
@@ -755,7 +765,7 @@ namespace TicketScheduleJob
                     4. SP_SearchTicketData_ByCategoryType
                     5. SP_SearchTicketData_ByAll                 
                  */
-                MySqlCommand sqlcmd = new MySqlCommand("", conn);
+                MySqlCommand sqlcmd = new MySqlCommand("", con);
 
                 // sqlcmd.Parameters.AddWithValue("HeaderStatus_Id", searchModel.HeaderStatusId);
                 // sqlcmd.CommandText = "SP_SearchReportData";
@@ -875,7 +885,7 @@ namespace TicketScheduleJob
             }
             finally
             {
-                if (ds != null) ds.Dispose(); conn.Close();
+                if (ds != null) ds.Dispose(); con.Close();
             }
             return objSearchResult;
         }
@@ -885,9 +895,10 @@ namespace TicketScheduleJob
 
         #region  StoreReportService
 
-        public SearchStoreResponseReport GetStoreReportSearch(StoreReportModel searchModel)
+        public SearchStoreResponseReport GetStoreReportSearch(StoreReportModel searchModel,string ConString)
         {
             DataSet ds = new DataSet();
+            MySqlConnection con = new MySqlConnection(ConString);
             MySqlCommand cmd = new MySqlCommand();
 
 
@@ -901,14 +912,14 @@ namespace TicketScheduleJob
             try
             {
                 exceptions.FileText("Step DAL 10 Start");
-                if (conn != null && conn.State == ConnectionState.Closed)
+                if (con != null && con.State == ConnectionState.Closed)
                 {
-                    conn.Open();
+                    con.Open();
                 }
-                cmd.Connection = conn;
+                cmd.Connection = con;
 
-                cmd = new MySqlCommand("SP_ScheduleStoreReportForDownload", conn);
-                cmd.Connection = conn;
+                cmd = new MySqlCommand("SP_ScheduleStoreReportForDownload", con);
+                cmd.Connection = con;
                 cmd.Parameters.AddWithValue("@_TenantID", searchModel.TenantID);
                 cmd.Parameters.AddWithValue("@_ActiveTabID", searchModel.ActiveTabId);
 
@@ -1091,7 +1102,7 @@ namespace TicketScheduleJob
             }
             finally
             {
-                if (ds != null) ds.Dispose(); conn.Close();
+                if (ds != null) ds.Dispose(); con.Close();
             }
             return objSearchResult;
         }
@@ -1099,7 +1110,7 @@ namespace TicketScheduleJob
         #endregion
 
 
-        public SMTPDetails GetSMTPDetails(int TenantID)
+        public SMTPDetails GetSMTPDetails(int TenantID,string ConString)
         {
             DataSet ds = new DataSet();
             SMTPDetails sMTPDetails = new SMTPDetails();
@@ -1107,12 +1118,12 @@ namespace TicketScheduleJob
             try
             {
                 exceptions.FileText("Step DAL 12 Start");
-
+                MySqlConnection con = new MySqlConnection(ConString);
                 MySqlCommand cmd = new MySqlCommand();
 
-                conn.Open();
-                cmd.Connection = conn;
-                MySqlCommand cmd1 = new MySqlCommand("SP_getSMTPDetails", conn);
+                con.Open();
+                cmd.Connection = con;
+                MySqlCommand cmd1 = new MySqlCommand("SP_getSMTPDetails", con);
                 cmd1.CommandType = CommandType.StoredProcedure;
                 cmd1.Parameters.AddWithValue("@Tenant_ID", TenantID);
                 MySqlDataAdapter da = new MySqlDataAdapter();
@@ -1139,7 +1150,7 @@ namespace TicketScheduleJob
             finally
             {
                 if (ds != null)
-                    ds.Dispose(); conn.Close();
+                    ds.Dispose(); con.Close();
             }
 
             return sMTPDetails;
@@ -1154,9 +1165,9 @@ namespace TicketScheduleJob
 
                 MySqlCommand cmd = new MySqlCommand();
 
-                 conn.Open();
-                cmd.Connection = conn;
-                MySqlCommand cmd1 = new MySqlCommand("SP_getMailContent", conn);
+                con.Open();
+                cmd.Connection = con;
+                MySqlCommand cmd1 = new MySqlCommand("SP_getMailContent", con);
                 cmd1.CommandType = CommandType.StoredProcedure;
                 cmd1.Parameters.AddWithValue("@Alert_TypeID", ticketschedulemodal.Alert_TypeID);
                 cmd1.Parameters.AddWithValue("@_ScheduleID", ticketschedulemodal.ScheduleID);
@@ -1182,7 +1193,7 @@ namespace TicketScheduleJob
             {
 
                 if (ds != null)
-                    ds.Dispose(); conn.Close();
+                    ds.Dispose(); con.Close();
             }
 
         }
@@ -1196,9 +1207,9 @@ namespace TicketScheduleJob
 
                 MySqlCommand cmd = new MySqlCommand();
 
-                conn.Open();
-                cmd.Connection = conn;
-                MySqlCommand cmd1 = new MySqlCommand("SP_getStoreMailContent", conn);
+                con.Open();
+                cmd.Connection = con;
+                MySqlCommand cmd1 = new MySqlCommand("SP_getStoreMailContent", con);
                 cmd1.CommandType = CommandType.StoredProcedure;
                 cmd1.Parameters.AddWithValue("@Alert_TypeID", ticketschedulemodal.Alert_TypeID);
                 cmd1.Parameters.AddWithValue("@_ScheduleID", ticketschedulemodal.ScheduleID);
@@ -1224,7 +1235,7 @@ namespace TicketScheduleJob
             {
 
                 if (ds != null)
-                    ds.Dispose(); conn.Close();
+                    ds.Dispose(); con.Close();
             }
 
         }
@@ -1236,9 +1247,9 @@ namespace TicketScheduleJob
                 exceptions.FileText("Step DAL 16 Start");
 
                 string exceptionmsg = "InnerExceptions: " + InnerExceptions + ", Message: " + Message + ", StackTrace: " + StackTrace + ", StatusCode: " + StatusCode;
-                conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SP_InsertSchedulerMailResult", conn);
-                cmd.Connection = conn;
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("SP_InsertSchedulerMailResult", con);
+                cmd.Connection = con;
                 cmd.Parameters.AddWithValue("@_EMailID", ticketschedulemodal.CreatedByEmailId);
                 cmd.Parameters.AddWithValue("@_SchedulerID", ticketschedulemodal.ScheduleID);
                 cmd.Parameters.AddWithValue("@_SchedulerType", SchedulerType);
@@ -1255,9 +1266,9 @@ namespace TicketScheduleJob
             }
             finally
             {
-                if (conn != null)
+                if (con != null)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
         }
@@ -1268,9 +1279,9 @@ namespace TicketScheduleJob
             try
             {
 
-                conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SP_ErrorLog", conn);
-                cmd.Connection = conn;
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("SP_ErrorLog", con);
+                cmd.Connection = con;
                 cmd.Parameters.AddWithValue("@User_ID", errorLog.UserID);
                 cmd.Parameters.AddWithValue("@Tenant_ID", errorLog.TenantID);
                 cmd.Parameters.AddWithValue("@Controller_Name", errorLog.ControllerName);
@@ -1280,7 +1291,7 @@ namespace TicketScheduleJob
                 cmd.Parameters.AddWithValue("@_IPAddress", errorLog.IPAddress);
                 cmd.CommandType = CommandType.StoredProcedure;
                 Success = Convert.ToInt32(cmd.ExecuteNonQuery());
-                conn.Close();
+                con.Close();
 
             }
             catch (Exception ex)
@@ -1290,9 +1301,9 @@ namespace TicketScheduleJob
             }
             finally
             {
-                if (conn != null)
+                if (con != null)
                 {
-                    conn.Close();
+                    con.Close();
                 }
             }
             return Success;

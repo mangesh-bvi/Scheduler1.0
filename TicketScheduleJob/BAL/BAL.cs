@@ -23,14 +23,14 @@ namespace TicketScheduleJob
             exceptions = new Exceptions();
         }
 
-        public void GetScheduleDetails()
+        public void GetScheduleDetails(string ConString)
         {
             try
             {
                 exceptions.FileText("Step BAL 1 Start");
 
                 List<TicketScheduleModal> ListTicketScheduleModal = new List<TicketScheduleModal>();
-                ListTicketScheduleModal = getdata.getScheduleDetails();
+                ListTicketScheduleModal = getdata.getScheduleDetails(ConString);
 
                 if (ListTicketScheduleModal.Count > 0)
                 {
@@ -43,7 +43,7 @@ namespace TicketScheduleJob
                                 SearchInputModel searchparams = JsonConvert.DeserializeObject<SearchInputModel>(ListTicketScheduleModal[i].SearchInputParams);
                                 searchparams.curentUserId = ListTicketScheduleModal[i].CreatedBy;
                                 searchparams.TenantID = ListTicketScheduleModal[i].TenantID;
-                                ListTicketScheduleModal[i].SearchOutputFileName = DashBoardSearchTicket(searchparams, ListTicketScheduleModal[i].CreatedBy, ListTicketScheduleModal[i].TenantID);
+                                ListTicketScheduleModal[i].SearchOutputFileName = DashBoardSearchTicket(searchparams, ListTicketScheduleModal[i].CreatedBy, ListTicketScheduleModal[i].TenantID, ConString);
                                 ListTicketScheduleModal[i].Alert_TypeID = (int)EnumMaster.Alert_TypeID.Dashboard;
                             }
                             if (ListTicketScheduleModal[i].ScheduleFrom == 2)
@@ -51,7 +51,7 @@ namespace TicketScheduleJob
                                 SearchTicketModel searchparams = JsonConvert.DeserializeObject<SearchTicketModel>(ListTicketScheduleModal[i].SearchInputParams);
                                 searchparams.AssigntoId = ListTicketScheduleModal[i].CreatedBy;
                                 searchparams.TenantID = ListTicketScheduleModal[i].TenantID;
-                                ListTicketScheduleModal[i].SearchOutputFileName = GetTicketsOnSearch(searchparams, ListTicketScheduleModal[i].CreatedBy, ListTicketScheduleModal[i].TenantID);
+                                ListTicketScheduleModal[i].SearchOutputFileName = GetTicketsOnSearch(searchparams, ListTicketScheduleModal[i].CreatedBy, ListTicketScheduleModal[i].TenantID, ConString);
                                 ListTicketScheduleModal[i].Alert_TypeID = (int)EnumMaster.Alert_TypeID.Ticket;
                             }
                             if (ListTicketScheduleModal[i].ScheduleFrom == 3)
@@ -60,12 +60,12 @@ namespace TicketScheduleJob
                                 searchparams.reportSearch = JsonConvert.DeserializeObject<ReportSearchData>(ListTicketScheduleModal[i].SearchInputParams);
                                 searchparams.curentUserId = ListTicketScheduleModal[i].CreatedBy;
                                 searchparams.TenantID = ListTicketScheduleModal[i].TenantID;
-                                ListTicketScheduleModal[i].SearchOutputFileName = GetReportSearch(searchparams, ListTicketScheduleModal[i].CreatedBy, ListTicketScheduleModal[i].TenantID);
+                                ListTicketScheduleModal[i].SearchOutputFileName = GetReportSearch(searchparams, ListTicketScheduleModal[i].CreatedBy, ListTicketScheduleModal[i].TenantID, ConString);
                                 ListTicketScheduleModal[i].Alert_TypeID = (int)EnumMaster.Alert_TypeID.Report;
                             }
 
 
-                            ListTicketScheduleModal[i].SMTPDetails = getdata.GetSMTPDetails(ListTicketScheduleModal[i].TenantID);
+                            ListTicketScheduleModal[i].SMTPDetails = getdata.GetSMTPDetails(ListTicketScheduleModal[i].TenantID, ConString);
 
                             getdata.GetMailContent(ListTicketScheduleModal[i]);
                         }
@@ -96,14 +96,14 @@ namespace TicketScheduleJob
 
         #region Store Reports
 
-        public void GetStoreScheduleDetails()
+        public void GetStoreScheduleDetails(string ConString)
         {
             try
             {
                 exceptions.FileText("Step BAL 1 Start");
 
                 List<TicketScheduleModal> ListTicketScheduleModal = new List<TicketScheduleModal>();
-                ListTicketScheduleModal = getdata.getStoreScheduleDetails();
+                ListTicketScheduleModal = getdata.getStoreScheduleDetails(ConString);
 
                 if (ListTicketScheduleModal.Count > 0)
                 {
@@ -115,12 +115,12 @@ namespace TicketScheduleJob
                                 StoreReportModel searchparams = new StoreReportModel();
                                  searchparams = JsonConvert.DeserializeObject<StoreReportModel>(ListTicketScheduleModal[i].SearchInputParams);
                                 searchparams.TenantID = ListTicketScheduleModal[i].TenantID;
-                                ListTicketScheduleModal[i].SearchOutputFileName = GetStoreReportSearch(searchparams, ListTicketScheduleModal[i].CreatedBy, ListTicketScheduleModal[i].TenantID);
+                                ListTicketScheduleModal[i].SearchOutputFileName = GetStoreReportSearch(searchparams, ListTicketScheduleModal[i].CreatedBy, ListTicketScheduleModal[i].TenantID, ConString);
                                 ListTicketScheduleModal[i].Alert_TypeID = 1;
 
 
 
-                            ListTicketScheduleModal[i].SMTPDetails = getdata.GetSMTPDetails(ListTicketScheduleModal[i].TenantID);
+                            ListTicketScheduleModal[i].SMTPDetails = getdata.GetSMTPDetails(ListTicketScheduleModal[i].TenantID, ConString);
 
                             getdata.GetSoreMailContent(ListTicketScheduleModal[i]);
                         }
@@ -166,14 +166,14 @@ namespace TicketScheduleJob
 
         #region  DashboardTickets
 
-        private string DashBoardSearchTicket(SearchInputModel searchparams, int CreatedBy, int TenantID)
+        private string DashBoardSearchTicket(SearchInputModel searchparams, int CreatedBy, int TenantID,string ConString)
         {
             List<SearchOutputDashBoard> _searchResult = null;
             string SearchOutputFileName = null;
             try
             {
                 exceptions.FileText("Step BAL 3 Start");
-                _searchResult = getdata.GetDashboardTicketsOnSearch(searchparams);
+                _searchResult = getdata.GetDashboardTicketsOnSearch(searchparams,ConString);
 
                 SearchOutputFileName = StoreReportCreateExcel(_searchResult, CreatedBy, TenantID, "DashBoard", "totalpages,ClaimStatus,createdago,assignedago,updatedago,responseTimeRemainingBy,responseOverdueBy,resolutionOverdueBy");
                 exceptions.FileText("Step BAL 3 End");
@@ -236,7 +236,7 @@ namespace TicketScheduleJob
 
         #region  Tickets
 
-        private string GetTicketsOnSearch(SearchTicketModel searchModel, int CreatedBy, int TenantID)
+        private string GetTicketsOnSearch(SearchTicketModel searchModel, int CreatedBy, int TenantID,string ConString)
         {
             List<SearchResponse> _searchResult = null;
             string SearchOutputFileName = null;
@@ -244,7 +244,7 @@ namespace TicketScheduleJob
             {
                 exceptions.FileText("Step BAL 6 Start");
 
-                _searchResult = getdata.GetTicketsOnSearch(searchModel);
+                _searchResult = getdata.GetTicketsOnSearch(searchModel, ConString);
 
                 SearchOutputFileName = StoreReportCreateExcel(_searchResult, CreatedBy, TenantID, "Tickets", "totalpages,ClaimStatus,createdago,assignedago,updatedago,responseTimeRemainingBy,responseOverdueBy,resolutionOverdueBy");
 
@@ -309,7 +309,7 @@ namespace TicketScheduleJob
 
         #region  ReportService
 
-        private string GetReportSearch(ReportSearchModel searchModel, int CreatedBy, int TenantID)
+        private string GetReportSearch(ReportSearchModel searchModel, int CreatedBy, int TenantID,string ConString)
         {
             List<SearchResponseReport> _searchResult = null;
             string SearchOutputFileName = null;
@@ -317,7 +317,7 @@ namespace TicketScheduleJob
             {
                 exceptions.FileText("Step BAL 9 Start");
 
-                _searchResult = getdata.GetReportSearch(searchModel);
+                _searchResult = getdata.GetReportSearch(searchModel, ConString);
 
                 SearchOutputFileName = StoreReportCreateExcel(_searchResult, CreatedBy, TenantID, "Report", "totalpages,ClaimStatus,createdago,assignedago,updatedago,responseTimeRemainingBy,responseOverdueBy,resolutionOverdueBy");
 
@@ -403,7 +403,7 @@ namespace TicketScheduleJob
 
         #region Store reportService
 
-        private string GetStoreReportSearch(StoreReportModel searchModel, int CreatedBy, int TenantID)
+        private string GetStoreReportSearch(StoreReportModel searchModel, int CreatedBy, int TenantID,string ConString)
         {
             SearchStoreResponseReport _searchResult = null;
             string SearchOutputFileName = null;
@@ -414,7 +414,7 @@ namespace TicketScheduleJob
             {
                 exceptions.FileText("Step BAL 9 Start");
 
-                _searchResult = getdata.GetStoreReportSearch(searchModel);
+                _searchResult = getdata.GetStoreReportSearch(searchModel, ConString);
 
                 if (searchModel.ActiveTabId.Equals(1))
                 {

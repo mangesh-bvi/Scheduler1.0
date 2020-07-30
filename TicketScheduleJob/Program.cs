@@ -120,7 +120,7 @@ namespace TicketScheduleJob
                 MySettingsConfigMoal.IntervalInMinutes = mySettingsConfig.IntervalInMinutes;
                 MySettingsConfigMoal.IsWriteLog = mySettingsConfig.IsWriteLog;
             }
-            catch (Exception ex)
+            catch 
             {
                
             }
@@ -165,7 +165,7 @@ namespace TicketScheduleJob
                     }
                 }
             }
-            catch (Exception ex)
+            catch 
             {
 
 

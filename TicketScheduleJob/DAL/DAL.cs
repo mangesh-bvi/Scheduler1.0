@@ -216,7 +216,7 @@ namespace TicketScheduleJob
 
             List<string> CountList = new List<string>();
 
-            int rowStart = 0; // searchparams.pageNo - 1) * searchparams.pageSize;
+            //int rowStart = 0; // searchparams.pageNo - 1) * searchparams.pageSize;
             try
             {
 
@@ -547,7 +547,7 @@ namespace TicketScheduleJob
             List<SearchResponse> temp = new List<SearchResponse>(); //delete later
             List<string> CountList = new List<string>();
 
-            int rowStart = 0; // searchparams.pageNo - 1) * searchparams.pageSize;
+            //int rowStart = 0; // searchparams.pageNo - 1) * searchparams.pageSize;
             try
             {
                 exceptions.FileText("Step DAL 7 Start");
@@ -748,7 +748,7 @@ namespace TicketScheduleJob
 
             List<string> CountList = new List<string>();
 
-            int resultCount = 0; // searchparams.pageNo - 1) * searchparams.pageSize;
+            //int resultCount = 0; // searchparams.pageNo - 1) * searchparams.pageSize;
             try
             {
                 exceptions.FileText("Step DAL 10 Start");
